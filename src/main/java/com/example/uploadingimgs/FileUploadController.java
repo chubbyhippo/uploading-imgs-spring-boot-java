@@ -23,22 +23,29 @@ public class FileUploadController {
         this.storageService = storageService;
     }
 
-    @GetMapping("/files/{filename:.+}")
+    @GetMapping("/imgs/{filename:.+}")
     @ResponseBody
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) throws IOException {
+    public ResponseEntity<Resource> serveImg(@PathVariable String filename) throws IOException {
 
         Resource file = storageService.loadAsResource(filename);
+        MediaType mediaType = MediaType.IMAGE_JPEG;
+        if (file.getFilename().toLowerCase().contains(".gif")) {
+            mediaType = MediaType.IMAGE_GIF;
+
+        } else if (file.getFilename().toLowerCase().contains(".png")) {
+            mediaType = MediaType.IMAGE_PNG;
+        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                "inline; filename=\"" + file.getFilename() + "\"")
-                .contentType(MediaType.IMAGE_JPEG)
+                        "inline; filename=\"" + file.getFilename() + "\"")
+                .contentType(mediaType)
                 .contentLength(file.contentLength())
                 .body(file);
     }
 
     @PostMapping("/")
     public ResponseEntity handleFileUpload(@RequestParam("file") MultipartFile file,
-                                                       RedirectAttributes redirectAttributes) {
+                                           RedirectAttributes redirectAttributes) {
 
         storageService.store(file);
         redirectAttributes.addFlashAttribute("message",
