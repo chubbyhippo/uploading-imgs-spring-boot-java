@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RestController
+@RequestMapping("imgs")
 public class FileUploadController {
 
     private final StorageService storageService;
@@ -23,7 +24,7 @@ public class FileUploadController {
         this.storageService = storageService;
     }
 
-    @GetMapping("/imgs/{filename:.+}")
+    @GetMapping("{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveImg(@PathVariable String filename) throws IOException {
 
@@ -43,14 +44,11 @@ public class FileUploadController {
                 .body(file);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity handleFileUpload(@RequestParam("file") MultipartFile file,
                                            RedirectAttributes redirectAttributes) {
 
         storageService.store(file);
-        redirectAttributes.addFlashAttribute("message",
-                "You successfully uploaded " + file.getOriginalFilename() + "!");
-
         return ResponseEntity.ok().build();
     }
 
